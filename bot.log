@@ -27,3 +27,9 @@ INFO:aiogram.event:Update id=358168113 is handled. Duration 162 ms by bot id=810
 INFO:aiogram.event:Update id=358168114 is handled. Duration 250 ms by bot id=8106078475
 INFO:aiogram.event:Update id=358168115 is handled. Duration 287 ms by bot id=8106078475
 INFO:aiogram.event:Update id=358168116 is handled. Duration 509 ms by bot id=8106078475
+ERROR:aiogram.dispatcher:Failed to fetch updates - TelegramNetworkError: HTTP Client says - Request timeout error
+WARNING:aiogram.dispatcher:Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8106078475)
+INFO:aiogram.dispatcher:Connection established (tryings = 1, bot id = 8106078475)
+ERROR:aiogram.dispatcher:Failed to fetch updates - TelegramNetworkError: HTTP Client says - Request timeout error
+WARNING:aiogram.dispatcher:Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8106078475)
+INFO:aiogram.dispatcher:Connection established (tryings = 1, bot id = 8106078475)
