@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Остановить все старые процессы бота и админки
+pkill -f bot.bot 2>/dev/null
+pkill -f web.app 2>/dev/null
+sleep 1
+
+# Очистить переменную окружения BOT_TOKEN, чтобы не мешала .env
+unset BOT_TOKEN
+
 # Инициализация базы
 python3 -m database.init_db
 

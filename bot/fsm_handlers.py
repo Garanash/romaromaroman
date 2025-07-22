@@ -5,11 +5,13 @@ from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemo
 from .materials import MATERIALS, EXTRAS
 from .states import OrderFSM
 import os
-from config import UPLOAD_FOLDER
 from datetime import datetime
 from .calendar import get_calendar
 import sqlite3
-from config import DB_PATH
+from dotenv import load_dotenv
+load_dotenv()
+DB_PATH = os.getenv('DB_PATH')
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
 
 router = Router()
 
@@ -218,7 +220,10 @@ async def process_date_callback(callback: types.CallbackQuery, state: FSMContext
 # Показываем выбор времени (инлайн-кнопки)
 async def show_time_picker(message, state):
     import sqlite3
-    from config import DB_PATH
+    import os
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+    DB_PATH = os.getenv('DB_PATH')
     data = await state.get_data()
     date = data.get('date')
     times = [f'{h:02d}:00' for h in range(9, 22)]

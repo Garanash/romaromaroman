@@ -1,6 +1,9 @@
 import sqlite3
 import os
-from config import DB_PATH, UPLOAD_FOLDER
+from dotenv import load_dotenv
+load_dotenv()
+DB_PATH = os.getenv('DB_PATH')
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
 
 def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)

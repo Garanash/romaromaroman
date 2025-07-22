@@ -2,7 +2,10 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime, timedelta
 import calendar
 import sqlite3
-from config import DB_PATH
+from dotenv import load_dotenv
+import os
+load_dotenv()
+DB_PATH = os.getenv('DB_PATH')
 
 RU_MONTHS = [
     '', 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
