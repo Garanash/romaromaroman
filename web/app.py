@@ -1,12 +1,18 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, flash
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
 import sqlite3
-from config import DB_PATH, ADMIN_USERS, ADMIN_PASSWORDS, UPLOAD_FOLDER
+from dotenv import load_dotenv
+load_dotenv()
+DB_PATH = os.getenv('DB_PATH')
+ADMIN_USERS = os.getenv('ADMIN_USERS').split(',')
+ADMIN_PASSWORDS = os.getenv('ADMIN_PASSWORDS').split(',')
+UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
 class AdminUser(UserMixin):
     def __init__(self, id, username):
@@ -30,7 +36,8 @@ def login():
                 user = AdminUser(id=idx, username=u)
                 login_user(user)
                 return redirect(url_for('orders'))
-        return render_template('login.html', error='Неверный логин или пароль')
+        flash('Неверный логин или пароль', 'danger')
+        return redirect(url_for('login'))
     return render_template('login.html')
 
 @app.route('/logout')

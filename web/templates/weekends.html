@@ -11,13 +11,20 @@
     </style>
 </head>
 <body class="bg-light">
-<nav class="navbar navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-dark bg-dark mb-4 sticky-top shadow">
     <div class="container-fluid">
         <span class="navbar-brand mb-0 h1">Админка: Выходные</span>
         <a href="/" class="btn btn-outline-light btn-sm">Назад к заявкам</a>
     </div>
 </nav>
 <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     <h5 class="mb-3">Отметьте нерабочие дни (выходные) для записи на замер:</h5>
     <form method="post" id="weekends-form">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -43,7 +50,7 @@
             <button type="button" class="btn btn-success btn-sm me-2" onclick="setAll(true)">Отметить все</button>
             <button type="button" class="btn btn-danger btn-sm" onclick="setAll(false)">Снять все</button>
         </div>
-        <table class="table table-bordered calendar-table bg-white">
+        <table class="table table-bordered calendar-table bg-white shadow-sm">
             <thead>
                 <tr>
                     <th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th>
