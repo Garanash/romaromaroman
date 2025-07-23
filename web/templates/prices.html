@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Настройка цен | Админка</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <script>
+    function addMaterialField() {
+        const row = document.createElement('div');
+        row.className = 'col-md-6 mb-2 d-flex align-items-center material-row';
+        row.innerHTML = `<input type="text" class="form-control me-2" name="new_material_name" placeholder="Новый материал" required>
+                         <input type="number" class="form-control me-2" name="new_material_price" placeholder="Цена" min="0" required>
+                         <span class="text-muted">₽/м²</span>
+                         <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='this.parentNode.remove()'>Удалить</button>`;
+        document.getElementById('materials-block').appendChild(row);
+    }
+    function addExtraField() {
+        const row = document.createElement('div');
+        row.className = 'col-md-6 mb-2 d-flex align-items-center extra-row';
+        row.innerHTML = `<input type="text" class="form-control me-2" name="new_extra_name" placeholder="Новая услуга" required>
+                         <input type="number" class="form-control me-2" name="new_extra_price" placeholder="Цена" min="0" required>
+                         <span class="text-muted">₽</span>
+                         <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='this.parentNode.remove()'>Удалить</button>`;
+        document.getElementById('extras-block').appendChild(row);
+    }
+    function removeRow(btn) {
+        btn.parentNode.remove();
+    }
+    </script>
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-dark mb-4 sticky-top shadow">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1">Админка: Настройка цен</span>
+        <a href="/" class="btn btn-outline-light btn-sm">Назад к заявкам</a>
+    </div>
+</nav>
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="post" class="card p-4 shadow-sm">
+        <h5>Материалы</h5>
+        <div class="row mb-3" id="materials-block">
+            {% for k, v in materials.items() %}
+            <div class="col-md-6 mb-2 d-flex align-items-center material-row">
+                <input type="text" class="form-control me-2" name="material_name" value="{{ k }}" required>
+                <input type="number" class="form-control me-2" name="material_price" value="{{ v }}" min="0" required> <span class="text-muted">₽/м²</span>
+                <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='removeRow(this)'>Удалить</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addMaterialField()">Добавить материал</button>
+        <h5 class="mt-4">Дополнительные услуги</h5>
+        <div class="row mb-3" id="extras-block">
+            {% for k, v in extras.items() %}
+            <div class="col-md-6 mb-2 d-flex align-items-center extra-row">
+                <input type="text" class="form-control me-2" name="extra_name" value="{{ k }}" required>
+                <input type="number" class="form-control me-2" name="extra_price" value="{{ v }}" min="0" required> <span class="text-muted">₽</span>
+                <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='removeRow(this)'>Удалить</button>
+            </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addExtraField()">Добавить услугу</button>
+        <button type="submit" class="btn btn-success mt-3">Сохранить</button>
+    </form>
+</div>
+</body>
+</html> 

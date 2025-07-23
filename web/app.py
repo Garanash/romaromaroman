@@ -8,6 +8,7 @@ DB_PATH = os.getenv('DB_PATH')
 ADMIN_USERS = os.getenv('ADMIN_USERS').split(',')
 ADMIN_PASSWORDS = os.getenv('ADMIN_PASSWORDS').split(',')
 UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
+import importlib.util
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
@@ -84,6 +85,7 @@ def weekends():
         for d in selected:
             c.execute('INSERT OR IGNORE INTO weekends (date) VALUES (?)', (d,))
         conn.commit()
+        flash('Выходные сохранены!', 'success')
     # Календарь на выбранный месяц
     cal = calendar.monthcalendar(year, month)
     days = []
@@ -103,6 +105,46 @@ def weekends():
     next_month = (month % 12) + 1
     next_year = year + 1 if month == 12 else year
     return render_template('weekends.html', days=days, weekends_set=weekends_set, year=year, month=month, prev_year=prev_year, prev_month=prev_month, next_year=next_year, next_month=next_month, today=datetime.today().date())
+
+@app.route('/prices', methods=['GET', 'POST'])
+def prices():
+    # Динамически загружаем материалы и доп. услуги
+    spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+    materials_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(materials_mod)
+    MATERIALS = dict(materials_mod.MATERIALS)
+    EXTRAS = dict(materials_mod.EXTRAS)
+    if request.method == 'POST':
+        # Обновляем существующие материалы
+        new_materials = {}
+        for i in range(len(request.form.getlist('material_name'))):
+            name = request.form.getlist('material_name')[i].strip()
+            price = request.form.getlist('material_price')[i].strip()
+            if name and price.isdigit():
+                new_materials[name] = int(price)
+        # Обновляем существующие услуги
+        new_extras = {}
+        for i in range(len(request.form.getlist('extra_name'))):
+            name = request.form.getlist('extra_name')[i].strip()
+            price = request.form.getlist('extra_price')[i].strip()
+            if name and price.isdigit():
+                new_extras[name] = int(price)
+        # Добавляем новые материал/услугу если заполнены
+        new_mat_name = request.form.get('new_material_name', '').strip()
+        new_mat_price = request.form.get('new_material_price', '').strip()
+        if new_mat_name and new_mat_price.isdigit():
+            new_materials[new_mat_name] = int(new_mat_price)
+        new_extra_name = request.form.get('new_extra_name', '').strip()
+        new_extra_price = request.form.get('new_extra_price', '').strip()
+        if new_extra_name and new_extra_price.isdigit():
+            new_extras[new_extra_name] = int(new_extra_price)
+        # Сохраняем в файл
+        with open('bot/materials.py', 'w', encoding='utf-8') as f:
+            f.write('MATERIALS = '+repr(new_materials)+'\n\n')
+            f.write('EXTRAS = '+repr(new_extras)+'\n')
+        flash('Цены и услуги успешно обновлены!', 'success')
+        return redirect(url_for('prices'))
+    return render_template('prices.html', materials=MATERIALS, extras=EXTRAS)
 
 if __name__ == '__main__':
     app.run(debug=True) 

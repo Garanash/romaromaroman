@@ -8,6 +8,11 @@ sleep 1
 # Очистить переменную окружения BOT_TOKEN, чтобы не мешала .env
 unset BOT_TOKEN
 
+# Резервное копирование базы данных
+if [ -f database/bot.db ]; then
+  cp database/bot.db database/bot.db.backup_$(date +%Y%m%d_%H%M%S)
+fi
+
 # Инициализация базы
 python3 -m database.init_db
 
