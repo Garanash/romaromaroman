@@ -69,6 +69,19 @@ def update_status():
     conn.close()
     return ('', 204)
 
+@app.route('/delete_order', methods=['POST'])
+@login_required
+def delete_order():
+    order_id = request.form.get('order_id')
+    if order_id:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('DELETE FROM orders WHERE id=?', (order_id,))
+        conn.commit()
+        conn.close()
+        flash('Заявка удалена!', 'success')
+    return redirect(url_for('orders'))
+
 @app.route('/weekends', methods=['GET', 'POST'])
 @login_required
 def weekends():
