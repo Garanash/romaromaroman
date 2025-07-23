@@ -30,7 +30,7 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
             <a href="?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-outline-secondary btn-sm">◀️</a>
             <span class="fw-bold">
-                <form id="goto-form" class="d-inline">
+                <div id="goto-form" class="d-inline">
                     <select id="goto-year" name="goto-year" class="form-select form-select-sm d-inline w-auto">
                         {% for y in range(year-5, year+6) %}
                             <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
@@ -42,7 +42,7 @@
                         {% endfor %}
                     </select>
                     <button type="button" class="btn btn-outline-primary btn-sm" onclick="gotoMonth()">Перейти</button>
-                </form>
+                </div>
             </span>
             <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-outline-secondary btn-sm">▶️</a>
         </div>

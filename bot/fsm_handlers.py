@@ -2,6 +2,7 @@ import re
 from aiogram import types, F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.filters import Command
 from .materials import MATERIALS, EXTRAS
 from .states import OrderFSM
 import os
@@ -9,6 +10,7 @@ from datetime import datetime
 from .calendar import get_calendar
 import sqlite3
 from dotenv import load_dotenv
+import importlib.util
 load_dotenv()
 DB_PATH = os.getenv('DB_PATH')
 UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER')
@@ -33,7 +35,7 @@ async def process_phone(message: types.Message, state: FSMContext):
     text = message.text.strip()
     if text.lower() == 'отмена':
         await state.clear()
-        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardRemove())
+        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
         return
     # Простейшая нормализация
     digits = re.sub(r'\D', '', text)
@@ -48,13 +50,13 @@ async def process_phone(message: types.Message, state: FSMContext):
     else:
         await message.answer('Не удалось распознать номер. Введите в формате +7XXXXXXXXXX или 8XXXXXXXXXX.')
 
-# Ввод адреса
+# Ввод адреса (кнопки материалов)
 @router.message(OrderFSM.address)
 async def process_address(message: types.Message, state: FSMContext):
     text = message.text.strip()
     if text.lower() == 'отмена':
         await state.clear()
-        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardRemove())
+        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
         return
     if text.lower() == 'назад':
         await message.answer('Введите номер телефона:', reply_markup=ReplyKeyboardMarkup(
@@ -65,22 +67,34 @@ async def process_address(message: types.Message, state: FSMContext):
         await message.answer('Адрес слишком короткий. Введите подробнее.')
         return
     await state.update_data(address=text)
-    # Кнопки выбора материала
-    buttons = [[KeyboardButton(text=m)] for m in MATERIALS.keys()]
+    # Динамически загружаем материалы
+    spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+    materials_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(materials_mod)
+    MATERIALS = materials_mod.MATERIALS
+    buttons = [[KeyboardButton(text=f'{m} ({MATERIALS[m]}₽/м²)')] for m in MATERIALS.keys()]
     buttons.append([KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
     await message.answer('Выберите материал потолка:', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
     await state.set_state(OrderFSM.material)
 
-# Выбор материала
+# Выбор материала (кнопки материалов)
 @router.message(OrderFSM.material)
 async def process_material(message: types.Message, state: FSMContext):
     text = message.text.strip()
+    # Динамически загружаем материалы
+    spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+    materials_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(materials_mod)
+    MATERIALS = materials_mod.MATERIALS
+    # Если кнопка содержит цену, извлекаем только название
+    if ' (' in text and '₽/м²' in text:
+        text = text[:text.rfind(' (')]
     if text.lower() == 'отмена':
         await state.clear()
-        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardRemove())
+        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
         return
     if text.lower() == 'назад':
-        buttons = [[KeyboardButton(text=m)] for m in MATERIALS.keys()]
+        buttons = [[KeyboardButton(text=f'{m} ({MATERIALS[m]}₽/м²)')] for m in MATERIALS.keys()]
         buttons.append([KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
         await message.answer('Выберите материал потолка:', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
         await state.set_state(OrderFSM.address)
@@ -93,43 +107,57 @@ async def process_material(message: types.Message, state: FSMContext):
         keyboard=[[KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')]], resize_keyboard=True))
     await state.set_state(OrderFSM.area)
 
-# Ввод площади
+# Ввод площади (кнопки доп. услуг)
 @router.message(OrderFSM.area)
 async def process_area(message: types.Message, state: FSMContext):
     text = message.text.strip().replace(',', '.')
     if text.lower() == 'отмена':
         await state.clear()
-        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardRemove())
+        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
         return
     if text.lower() == 'назад':
-        buttons = [[KeyboardButton(text=m)] for m in MATERIALS.keys()]
+        # Динамически загружаем материалы
+        spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+        materials_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(materials_mod)
+        MATERIALS = materials_mod.MATERIALS
+        buttons = [[KeyboardButton(text=f'{m} ({MATERIALS[m]}₽/м²)')] for m in MATERIALS.keys()]
         buttons.append([KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
         await message.answer('Выберите материал потолка:', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
         await state.set_state(OrderFSM.material)
         return
     try:
         area = float(text)
-        if not (1 <= area <= 500):
+        if not (1 <= area <= 1000):
             raise ValueError
     except ValueError:
-        await message.answer('Введите корректную площадь (от 1 до 500 м²).')
+        await message.answer('Введите корректную площадь (от 1 до 1000 м²) если нужно больше введите 999.')
         return
     await state.update_data(area=area)
-    # Кнопки выбора доп. работ
-    buttons = [[KeyboardButton(text=extra)] for extra in EXTRAS.keys()]
+    # Динамически загружаем доп. услуги
+    spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+    materials_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(materials_mod)
+    EXTRAS = dict(materials_mod.EXTRAS)
+    buttons = [[KeyboardButton(text=f'{extra} ({EXTRAS[extra]}₽)')] for extra in EXTRAS.keys()]
     buttons.append([KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
     await message.answer('Выберите дополнительные работы (можно несколько, затем "Далее"):', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
     await state.set_state(OrderFSM.extras)
 
-# Выбор доп. работ
+# Выбор доп. работ (динамическая проверка)
 @router.message(OrderFSM.extras)
 async def process_extras(message: types.Message, state: FSMContext):
     text = message.text.strip()
     data = await state.get_data()
     selected = data.get('extras', [])
+    # Динамически загружаем доп. услуги
+    spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+    materials_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(materials_mod)
+    EXTRAS = dict(materials_mod.EXTRAS)
     if text.lower() == 'отмена':
         await state.clear()
-        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardRemove())
+        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
         return
     if text.lower() == 'назад':
         await message.answer('Введите площадь потолка (м²):', reply_markup=ReplyKeyboardMarkup(
@@ -142,11 +170,21 @@ async def process_extras(message: types.Message, state: FSMContext):
             keyboard=[[KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')]], resize_keyboard=True))
         await state.set_state(OrderFSM.photos)
         return
-    if text in EXTRAS:
-        if text not in selected:
-            selected.append(text)
+    # Проверяем по кнопке с ценой
+    chosen = None
+    for extra in EXTRAS.keys():
+        if text.startswith(extra):
+            chosen = extra
+            break
+    if chosen:
+        if chosen not in selected:
+            selected.append(chosen)
         await state.update_data(extras=selected)
-        await message.answer(f'Добавлено: {text}. Можно выбрать ещё или нажать "Далее".')
+        # Пересобираем кнопки без выбранных опций
+        remaining = [e for e in EXTRAS.keys() if e not in selected]
+        buttons = [[KeyboardButton(text=f'{e} ({EXTRAS[e]}₽)')] for e in remaining]
+        buttons.append([KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
+        await message.answer(f'Добавлено: {chosen}. Можно выбрать ещё или нажать "Далее".', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
         return
     await message.answer('Пожалуйста, выберите опцию из списка или нажмите "Далее".')
 
@@ -171,7 +209,7 @@ async def process_photos_control(message: types.Message, state: FSMContext):
     data = await state.get_data()
     if text == 'отмена':
         await state.clear()
-        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardRemove())
+        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
         return
     if text == 'назад':
         buttons = [[KeyboardButton(text=extra)] for extra in EXTRAS.keys()]
@@ -264,12 +302,22 @@ async def process_time_callback(callback: types.CallbackQuery, state: FSMContext
 # Функция для показа сводки заказа и подтверждения
 async def show_order_summary(message, state):
     data = await state.get_data()
+    # Динамически загружаем материалы и услуги
+    spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+    materials_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(materials_mod)
+    MATERIALS = materials_mod.MATERIALS
+    EXTRAS = dict(materials_mod.EXTRAS)
     extras = data.get('extras', [])
     area = data.get('area', 0)
     material = data.get('material', '')
+    # Цена материала
     price = MATERIALS.get(material, 0) * area
+    # Цена монтажа (всегда включается)
+    price_montage = 450 * area
+    # Цена доп. услуг
     extras_price = sum(EXTRAS.get(e, 0) for e in extras)
-    total = price + extras_price
+    total = price + price_montage + extras_price
     summary = f"""
 <b>Проверьте заявку:</b>
 Имя: {data.get('name')}
@@ -277,12 +325,12 @@ async def show_order_summary(message, state):
 Адрес: {data.get('address')}
 Материал: {material}
 Площадь: {area} м²
-Доп. работы: {', '.join(extras) if extras else 'нет'}
+Доп. работы: Монтаж потолка (450₽/м²){', ' + ', '.join(extras) if extras else ''}
 Дата замера: {data.get('date')}
 Время замера: {data.get('time') if data.get('time') else '-'}
 Фото: {'есть' if data.get('photos') else 'нет'}
 
-<b>Итого: {total} ₽</b>
+<b>приблизительная стоимость по заявке: {total} ₽</b>
 """
     kb = ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Подтвердить'), KeyboardButton(text='Отмена')]], resize_keyboard=True)
     await message.answer(summary, reply_markup=kb, parse_mode='HTML')
@@ -293,7 +341,7 @@ async def process_confirm(message: types.Message, state: FSMContext):
     text = message.text.strip().lower()
     if text == 'отмена':
         await state.clear()
-        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardRemove())
+        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
         return
     if text == 'подтвердить':
         data = await state.get_data()
@@ -346,3 +394,19 @@ async def notify_master(bot, data):
                 await bot.send_photo(master_id, f)
         except Exception:
             pass 
+
+# Хендлер для кнопки 'Создать новую заявку'
+@router.message(lambda m: m.text and m.text.lower() == 'создать новую заявку')
+async def restart_order(message: types.Message, state: FSMContext):
+    await state.clear()
+    from .bot import cmd_start
+    await cmd_start(message, state)
+
+# Везде, где заявка отменена:
+# await state.clear()
+# await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardRemove())
+# заменить на:
+# await state.clear()
+# await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
+
+# Везде, где эти кнопки используются (OrderFSM.extras, OrderFSM.photos -> назад и т.д.) 

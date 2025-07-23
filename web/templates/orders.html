@@ -10,6 +10,7 @@
     <div class="container-fluid">
         <span class="navbar-brand mb-0 h1">Админка: Заявки</span>
         <span class="text-white">{{ current_user.username }}</span>
+        <a href="{{ url_for('prices') }}" class="btn btn-outline-info btn-sm me-2">Цены и услуги</a>
         <a href="{{ url_for('weekends') }}" class="btn btn-outline-warning btn-sm me-2">Выходные</a>
         <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm">Выйти</a>
     </div>
