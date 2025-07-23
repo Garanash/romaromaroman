@@ -4,6 +4,32 @@
     <meta charset="UTF-8">
     <title>Настройка цен | Админка</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #f6f8fa; font-family: 'Montserrat', Arial, sans-serif; color: #222; }
+        .navbar { background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 12px rgba(30,64,175,0.04); border-radius: 0 0 1.2rem 1.2rem; padding-top: 0.7rem; padding-bottom: 0.7rem; }
+        .navbar .navbar-brand { color: #1e40af; font-weight: 700; font-size: 1.3rem; letter-spacing: 0.01em; }
+        .navbar .btn { background: #fff; border: 1.5px solid #e5e7eb; box-shadow: 0 1px 4px rgba(30,64,175,0.04); margin-left: 0.5rem; color: #1e40af; font-weight: 500; }
+        .navbar .btn:hover { background: #1e40af; color: #fff; border-color: #1e40af; }
+        .main-card { background: #fff; border-radius: 1.2rem; box-shadow: 0 4px 32px rgba(30,64,175,0.07); padding: 2.2rem 2rem 2rem 2rem; margin-bottom: 2rem; }
+        .btn { border-radius: 0.7rem; font-weight: 600; letter-spacing: 0.02em; transition: box-shadow 0.2s; }
+        .btn-outline-primary { border-color: #1e40af; color: #1e40af; }
+        .btn-outline-primary:hover { background: #1e40af; color: #fff; }
+        .btn-outline-danger { border-color: #a21caf; color: #a21caf; }
+        .btn-outline-danger:hover { background: #a21caf; color: #fff; }
+        .btn-outline-light { border-color: #e5e7eb; color: #1e40af; }
+        .btn-outline-light:hover { background: #1e40af; color: #fff; }
+        .alert { border-radius: 0.7rem; font-weight: 500; background: #e0e7ff; color: #1e40af; border: none; box-shadow: 0 2px 8px rgba(30,64,175,0.07); margin-bottom: 1.2rem; }
+        @media (max-width: 900px) { .main-card { padding: 1.2rem 0.5rem; } }
+    </style>
+    <script>
+    window.onload = function() {
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(el => el.style.opacity = 0);
+        }, 2500);
+    }
+    </script>
     <script>
     function addMaterialField() {
         const row = document.createElement('div');
@@ -11,7 +37,7 @@
         row.innerHTML = `<input type="text" class="form-control me-2" name="new_material_name" placeholder="Новый материал" required>
                          <input type="number" class="form-control me-2" name="new_material_price" placeholder="Цена" min="0" required>
                          <span class="text-muted">₽/м²</span>
-                         <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='this.parentNode.remove()'>Удалить</button>`;
+                         <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='this.parentNode.remove()'><i class='fa-solid fa-trash'></i></button>`;
         document.getElementById('materials-block').appendChild(row);
     }
     function addExtraField() {
@@ -20,7 +46,7 @@
         row.innerHTML = `<input type="text" class="form-control me-2" name="new_extra_name" placeholder="Новая услуга" required>
                          <input type="number" class="form-control me-2" name="new_extra_price" placeholder="Цена" min="0" required>
                          <span class="text-muted">₽</span>
-                         <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='this.parentNode.remove()'>Удалить</button>`;
+                         <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='this.parentNode.remove()'><i class='fa-solid fa-trash'></i></button>`;
         document.getElementById('extras-block').appendChild(row);
     }
     function removeRow(btn) {
@@ -28,45 +54,46 @@
     }
     </script>
 </head>
-<body class="bg-light">
-<nav class="navbar navbar-dark bg-dark mb-4 sticky-top shadow">
+<body>
+<nav class="navbar navbar-dark mb-4 sticky-top shadow-sm">
     <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">Админка: Настройка цен</span>
-        <a href="/" class="btn btn-outline-light btn-sm">Назад к заявкам</a>
+        <span class="navbar-brand mb-0 h1"><i class="fa-solid fa-tags me-2"></i>Админка: Настройка цен</span>
+        <a href="/" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-arrow-left"></i> Назад к заявкам</a>
     </div>
 </nav>
 <div class="container">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         {% for category, message in messages %}
-          <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+          <div class="alert alert-{{ category }} mt-3 shadow d-flex align-items-center"><i class="fa-solid fa-circle-info me-2"></i> {{ message }}</div>
         {% endfor %}
       {% endif %}
     {% endwith %}
-    <form method="post" class="card p-4 shadow-sm">
-        <h5>Материалы</h5>
+    <form method="post" class="main-card">
+        <h5><i class="fa-solid fa-layer-group me-2"></i>Материалы</h5>
         <div class="row mb-3" id="materials-block">
             {% for k, v in materials.items() %}
             <div class="col-md-6 mb-2 d-flex align-items-center material-row">
                 <input type="text" class="form-control me-2" name="material_name" value="{{ k }}" required>
                 <input type="number" class="form-control me-2" name="material_price" value="{{ v }}" min="0" required> <span class="text-muted">₽/м²</span>
-                <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='removeRow(this)'>Удалить</button>
+                <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='removeRow(this)'><i class='fa-solid fa-trash'></i></button>
             </div>
             {% endfor %}
         </div>
-        <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addMaterialField()">Добавить материал</button>
-        <h5 class="mt-4">Дополнительные услуги</h5>
+        <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addMaterialField()"><i class="fa-solid fa-plus"></i> Добавить материал</button>
+        <h5 class="mt-4"><i class="fa-solid fa-screwdriver-wrench me-2"></i>Дополнительные услуги</h5>
         <div class="row mb-3" id="extras-block">
             {% for k, v in extras.items() %}
             <div class="col-md-6 mb-2 d-flex align-items-center extra-row">
                 <input type="text" class="form-control me-2" name="extra_name" value="{{ k }}" required>
                 <input type="number" class="form-control me-2" name="extra_price" value="{{ v }}" min="0" required> <span class="text-muted">₽</span>
-                <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='removeRow(this)'>Удалить</button>
+                <button type='button' class='btn btn-outline-danger btn-sm ms-2' onclick='removeRow(this)'><i class='fa-solid fa-trash'></i></button>
             </div>
             {% endfor %}
         </div>
-        <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addExtraField()">Добавить услугу</button>
-        <button type="submit" class="btn btn-success mt-3">Сохранить</button>
+        <button type="button" class="btn btn-outline-primary btn-sm mb-3" onclick="addExtraField()"><i class="fa-solid fa-plus"></i> Добавить услугу</button>
+        <div class="w-100"></div>
+        <button type="submit" class="btn btn-outline-primary mt-4"><i class="fa-solid fa-floppy-disk"></i> Сохранить</button>
     </form>
 </div>
 </body>
