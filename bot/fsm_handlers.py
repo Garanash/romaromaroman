@@ -44,7 +44,7 @@ async def process_phone(message: types.Message, state: FSMContext):
     if len(digits) == 11 and digits.startswith('7'):
         phone = f'+{digits}'
         await state.update_data(phone=phone)
-        await message.answer('Введите адрес монтажа:', reply_markup=ReplyKeyboardMarkup(
+        await message.answer('Введите адрес для вызова замерщика:', reply_markup=ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')]], resize_keyboard=True))
         await state.set_state(OrderFSM.address)
     else:
@@ -166,7 +166,7 @@ async def process_extras(message: types.Message, state: FSMContext):
         return
     if text.lower() == 'далее':
         await state.update_data(extras=selected)
-        await message.answer('Пожалуйста, отправьте фото помещения (можно несколько, затем "Далее"):', reply_markup=ReplyKeyboardMarkup(
+        await message.answer('Пожалуйста, отправьте фото помещения (можно несколько, затем "Далее") или просто далее:', reply_markup=ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')]], resize_keyboard=True))
         await state.set_state(OrderFSM.photos)
         return

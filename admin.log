@@ -6,30 +6,51 @@
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 684-557-523
-127.0.0.1 - - [23/Jul/2025 11:04:54] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:05:52] "[32mPOST /delete_order HTTP/1.1[0m" 302 -
-127.0.0.1 - - [23/Jul/2025 11:05:52] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:05:58] "[32mPOST /delete_order HTTP/1.1[0m" 302 -
-127.0.0.1 - - [23/Jul/2025 11:05:58] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:00] "[32mPOST /delete_order HTTP/1.1[0m" 302 -
-127.0.0.1 - - [23/Jul/2025 11:06:00] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:02] "[32mPOST /delete_order HTTP/1.1[0m" 302 -
-127.0.0.1 - - [23/Jul/2025 11:06:02] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:04] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:16] "[32mPOST /delete_order HTTP/1.1[0m" 302 -
-127.0.0.1 - - [23/Jul/2025 11:06:16] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:28] "[32mPOST /delete_order HTTP/1.1[0m" 302 -
-127.0.0.1 - - [23/Jul/2025 11:06:28] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:30] "[32mPOST /delete_order HTTP/1.1[0m" 302 -
-127.0.0.1 - - [23/Jul/2025 11:06:30] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:32] "[32mPOST /delete_order HTTP/1.1[0m" 302 -
-127.0.0.1 - - [23/Jul/2025 11:06:32] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:33] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:36] "GET /prices HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:39] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:40] "GET /weekends HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:46] "GET /weekends?year=2025&month=8 HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:49] "GET /weekends?year=2025&month=7 HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:06:50] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:08:24] "GET /prices HTTP/1.1" 200 -
-127.0.0.1 - - [23/Jul/2025 11:08:25] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:25:54] "GET /prices HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:30:48] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:31:31] "GET /prices HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:31:43] "[32mPOST /prices HTTP/1.1[0m" 302 -
+127.0.0.1 - - [24/Jul/2025 11:31:43] "GET /prices HTTP/1.1" 200 -
+ * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 684-557-523
+127.0.0.1 - - [24/Jul/2025 11:32:34] "GET /prices HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:32:36] "[32mPOST /prices HTTP/1.1[0m" 302 -
+127.0.0.1 - - [24/Jul/2025 11:32:36] "GET /prices HTTP/1.1" 200 -
+ * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 684-557-523
+127.0.0.1 - - [24/Jul/2025 11:32:59] "[32mPOST /prices HTTP/1.1[0m" 302 -
+127.0.0.1 - - [24/Jul/2025 11:32:59] "GET /prices HTTP/1.1" 200 -
+ * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 684-557-523
+127.0.0.1 - - [24/Jul/2025 11:33:02] "[32mPOST /prices HTTP/1.1[0m" 302 -
+127.0.0.1 - - [24/Jul/2025 11:33:02] "GET /prices HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:33:03] "[32mPOST /prices HTTP/1.1[0m" 302 -
+127.0.0.1 - - [24/Jul/2025 11:33:03] "GET /prices HTTP/1.1" 200 -
+ * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 684-557-523
+127.0.0.1 - - [24/Jul/2025 11:33:03] "[32mPOST /prices HTTP/1.1[0m" 302 -
+ * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 684-557-523
+127.0.0.1 - - [24/Jul/2025 11:33:03] "GET /prices HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:33:03] "[32mPOST /prices HTTP/1.1[0m" 302 -
+ * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 684-557-523
+127.0.0.1 - - [24/Jul/2025 11:33:04] "GET /prices HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:33:37] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:33:40] "GET /weekends HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:33:44] "GET /weekends?year=2025&month=8 HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:33:46] "GET /weekends?year=2025&month=9 HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:33:49] "GET /weekends?year=2025&month=8 HTTP/1.1" 200 -
+127.0.0.1 - - [24/Jul/2025 11:34:22] "GET / HTTP/1.1" 200 -
