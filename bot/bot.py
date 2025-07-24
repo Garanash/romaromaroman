@@ -27,16 +27,20 @@ dp.include_router(fsm_router)
 @dp.message(Command('start'))
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
-    # Сначала отправляем калаж с фото
-    examples = [
-        {'file': 'bot/photos/1.png', 'caption': 'Гостиная с многоуровневым потолком'},
-        {'file': 'bot/photos/2.jpg', 'caption': 'Кухня с подсветкой'},
-        {'file': 'bot/photos/3.jpg', 'caption': 'Спальня с фотопечатью'},
-        {'file': 'bot/photos/4.jpg', 'caption': 'Классический белый потолок'},
-        {'file': 'bot/photos/5.jpg', 'caption': 'Потолок с точечными светильниками'},
-    ]
-    media = [InputMediaPhoto(media=FSInputFile(ex['file']), caption=('Примеры работ' if i == 0 else '')) for i, ex in enumerate(examples[1:])]
-    await message.answer_media_group(media)
+    # Сначала отправляем подпись
+    await message.answer('Примеры работ')
+    # Получаем все фото из папки bot/photos
+    photos_dir = os.path.join(os.path.dirname(__file__), 'photos')
+    photo_files = sorted([f for f in os.listdir(photos_dir) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
+    # Отправляем калажами по 10 фото
+    batch_size = 10
+    for i in range(0, len(photo_files), batch_size):
+        batch = photo_files[i:i+batch_size]
+        media = []
+        for fname in batch:
+            path = os.path.join(photos_dir, fname)
+            media.append(InputMediaPhoto(media=FSInputFile(path)))
+        await message.answer_media_group(media)
     # Далее логика приветствия/запроса имени
     user = message.from_user
     full_name = (user.first_name or '') + (' ' + user.last_name if user.last_name else '')
@@ -45,7 +49,7 @@ async def cmd_start(message: Message, state: FSMContext):
         await state.update_data(name=full_name.strip())
         greet = f'👋 Привет, {full_name.strip()}!\nМеня зовут мастер Роман и я делаю потолки уже много лет, могу исполнить заказы любой сложности.'
         await message.answer(greet, reply_markup=ReplyKeyboardRemove())
-        await message.answer('Пожалуйста, введите номер телефона (в любом формате):')
+        await message.answer('Для оформления заявки на замер пожалуйста, введите номер телефона (в любом формате):')
         from .states import OrderFSM
         await state.set_state(OrderFSM.phone)
     else:
