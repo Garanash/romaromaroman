@@ -168,6 +168,12 @@ def uploaded_file(filename):
     upload_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database', 'uploads')
     return send_from_directory(upload_path, filename)
 
+@app.route('/assets/<path:filename>')
+def assets(filename):
+    # Получаем абсолютный путь к папке assets
+    assets_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets')
+    return send_from_directory(assets_folder, filename)
+
 @app.route('/weekends', methods=['GET', 'POST'])
 @login_required
 def weekends():
