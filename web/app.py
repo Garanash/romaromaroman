@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, flash
+from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, flash, make_response
 from flask_login import LoginManager, login_user, login_required, logout_user, UserMixin, current_user
 import sqlite3
 from dotenv import load_dotenv
@@ -52,10 +52,14 @@ def logout():
 def orders():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute('SELECT * FROM orders ORDER BY created_at DESC')
+    c.execute('SELECT id, name, phone, address, material, area, extras, photos, date, time, comment, price, status FROM orders ORDER BY created_at DESC')
     orders = c.fetchall()
     conn.close()
-    return render_template('orders.html', orders=orders)
+    response = make_response(render_template('orders.html', orders=orders))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/update_status', methods=['POST'])
 @login_required
@@ -81,6 +85,88 @@ def delete_order():
         conn.close()
         flash('Заявка удалена!', 'success')
     return redirect(url_for('orders'))
+
+@app.route('/contractors')
+@login_required
+def contractors():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT id, name, phone, telegram_id FROM contractors ORDER BY id')
+    contractors = c.fetchall()
+    conn.close()
+    return render_template('contractors.html', contractors=contractors)
+
+@app.route('/add_contractor', methods=['POST'])
+@login_required
+def add_contractor():
+    name = request.form.get('contractor_name')
+    phone = request.form.get('contractor_phone')
+    telegram_id = request.form.get('contractor_telegram')
+
+    if name and phone:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('INSERT INTO contractors (name, phone, telegram_id) VALUES (?, ?, ?)',
+                 (name, phone, telegram_id if telegram_id else None))
+        conn.commit()
+        conn.close()
+        flash('Подрядчик добавлен!', 'success')
+    else:
+        flash('Заполните обязательные поля!', 'danger')
+
+    return redirect(url_for('contractors'))
+
+@app.route('/edit_contractor/<int:contractor_id>', methods=['GET', 'POST'])
+@login_required
+def edit_contractor(contractor_id):
+    if request.method == 'POST':
+        name = request.form.get('contractor_name')
+        phone = request.form.get('contractor_phone')
+        telegram_id = request.form.get('contractor_telegram')
+
+        if name and phone:
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute('UPDATE contractors SET name=?, phone=?, telegram_id=? WHERE id=?',
+                     (name, phone, telegram_id if telegram_id else None, contractor_id))
+            conn.commit()
+            conn.close()
+            flash('Подрядчик обновлен!', 'success')
+            return redirect(url_for('contractors'))
+        else:
+            flash('Заполните обязательные поля!', 'danger')
+    
+    # GET запрос - показываем форму редактирования
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('SELECT id, name, phone, telegram_id FROM contractors WHERE id=?', (contractor_id,))
+    contractor = c.fetchone()
+    conn.close()
+    
+    if not contractor:
+        flash('Подрядчик не найден!', 'danger')
+        return redirect(url_for('contractors'))
+    
+    return render_template('edit_contractor.html', contractor=contractor)
+
+@app.route('/delete_contractor', methods=['POST'])
+@login_required
+def delete_contractor():
+    contractor_id = request.form.get('contractor_id')
+    if contractor_id:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute('DELETE FROM contractors WHERE id=?', (contractor_id,))
+        conn.commit()
+        conn.close()
+        flash('Подрядчик удален!', 'success')
+    return redirect(url_for('contractors'))
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    # Получаем абсолютный путь к папке uploads
+    upload_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'database', 'uploads')
+    return send_from_directory(upload_path, filename)
 
 @app.route('/weekends', methods=['GET', 'POST'])
 @login_required
@@ -160,4 +246,4 @@ def prices():
     return render_template('prices.html', materials=MATERIALS, extras=EXTRAS)
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True, port=5001) 

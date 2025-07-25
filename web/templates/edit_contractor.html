@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактировать подрядчика | Админка</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #f6f8fa;
+            font-family: 'Montserrat', Arial, sans-serif;
+            color: #222;
+        }
+        .navbar {
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            box-shadow: 0 2px 12px rgba(30,64,175,0.04);
+            border-radius: 0 0 1.2rem 1.2rem;
+            padding-top: 0.7rem;
+            padding-bottom: 0.7rem;
+        }
+        .navbar .navbar-brand {
+            color: #1e40af;
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: 0.01em;
+        }
+        .navbar .btn {
+            background: #fff;
+            border: 1.5px solid #e5e7eb;
+            box-shadow: 0 1px 4px rgba(30,64,175,0.04);
+            margin-left: 0.5rem;
+        }
+        .navbar .btn:hover {
+            background: #1e40af;
+            color: #fff;
+            border-color: #1e40af;
+        }
+        .main-card {
+            background: #fff;
+            border-radius: 1.2rem;
+            box-shadow: 0 4px 32px rgba(30,64,175,0.07);
+            padding: 2.2rem 2rem 2rem 2rem;
+            margin-bottom: 2rem;
+        }
+        .form-control, .form-select {
+            border-radius: 0.7rem;
+            border: 1.5px solid #e5e7eb;
+            background: #f6f8fa;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #1e40af;
+            box-shadow: 0 0 0 0.2rem rgba(30,64,175,0.15);
+            background: #fff;
+        }
+        .form-label {
+            color: #1e40af;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            border: none;
+            border-radius: 0.7rem;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(30,64,175,0.3);
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30,64,175,0.4);
+        }
+        .btn-outline-secondary {
+            border-radius: 0.7rem;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+            transition: all 0.3s ease;
+        }
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+        }
+        .alert {
+            border-radius: 0.7rem;
+            font-weight: 500;
+            border: none;
+            box-shadow: 0 2px 8px rgba(30,64,175,0.07);
+            margin-bottom: 1.2rem;
+        }
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .alert-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        @media (max-width: 900px) {
+            .main-card { padding: 1.2rem 0.5rem; }
+        }
+    </style>
+    <script>
+        window.onload = function() {
+            setTimeout(function() {
+                document.querySelectorAll('.alert').forEach(el => el.style.opacity = 0);
+            }, 2500);
+        }
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-dark mb-4 sticky-top shadow-sm">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1"><i class="fa-solid fa-edit me-2"></i>Редактировать подрядчика</span>
+        <a href="{{ url_for('contractors') }}" class="btn btn-outline-light btn-sm me-2"><i class="fa-solid fa-arrow-left"></i> Назад к подрядчикам</a>
+        <a href="/" class="btn btn-outline-light btn-sm me-2"><i class="fa-solid fa-home"></i> Главная</a>
+    </div>
+</nav>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-3 shadow d-flex align-items-center">
+                    <i class="fa-solid fa-circle-info me-2"></i> {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="main-card">
+        <h5 class="mb-4"><i class="fa-solid fa-edit me-2"></i>Редактирование подрядчика #{{ contractor[0] }}</h5>
+        
+        <form method="post" class="needs-validation" novalidate>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="contractor_name" class="form-label">
+                        <i class="fa-solid fa-user me-1"></i>Имя подрядчика
+                    </label>
+                    <input type="text" class="form-control" id="contractor_name" name="contractor_name" 
+                           value="{{ contractor[1] }}" required>
+                    <div class="invalid-feedback">
+                        Пожалуйста, введите имя подрядчика.
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <label for="contractor_phone" class="form-label">
+                        <i class="fa-solid fa-phone me-1"></i>Телефон
+                    </label>
+                    <input type="tel" class="form-control" id="contractor_phone" name="contractor_phone" 
+                           value="{{ contractor[2] }}" required>
+                    <div class="invalid-feedback">
+                        Пожалуйста, введите номер телефона.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <label for="contractor_telegram" class="form-label">
+                        <i class="fa-brands fa-telegram me-1"></i>Telegram ID
+                    </label>
+                    <input type="text" class="form-control" id="contractor_telegram" name="contractor_telegram" 
+                           value="{{ contractor[3] if contractor[3] else '' }}" 
+                           placeholder="123456789">
+                    <div class="form-text">
+                        <i class="fa-solid fa-info-circle me-1"></i>Необязательное поле
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary me-3">
+                        <i class="fa-solid fa-save me-1"></i>Сохранить изменения
+                    </button>
+                    <a href="{{ url_for('contractors') }}" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-times me-1"></i>Отмена
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Валидация форм Bootstrap
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            var validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+</script>
+</body>
+</html> 

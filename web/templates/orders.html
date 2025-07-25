@@ -2,6 +2,9 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Заявки | Админка</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -116,6 +119,45 @@
             background: #1e40af;
             color: #fff;
         }
+        .btn-photo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        .btn-photo:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-photo:active {
+            transform: translateY(0);
+        }
+        .modal-content {
+            border-radius: 1rem;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        .modal-header {
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 1rem 1rem 0 0;
+        }
+        .modal-body {
+            padding: 2rem;
+        }
+        .modal-footer {
+            border-top: 1px solid #e5e7eb;
+            background: #f8fafc;
+            border-radius: 0 0 1rem 1rem;
+        }
+        .modal img {
+            border-radius: 0.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
         @media (max-width: 900px) {
             .main-card { padding: 1.2rem 0.5rem; }
             .table-responsive { font-size: 0.97rem; }
@@ -134,7 +176,14 @@
     <div class="container-fluid">
         <span class="navbar-brand mb-0 h1"><i class="fa-solid fa-list-check me-2"></i>Админка: Заявки</span>
         <span class="text-dark me-3"><i class="fa-solid fa-user"></i> {{ current_user.username }}</span>
+        <span class="text-success me-3" id="auto-refresh-indicator">
+            <i class="fa-solid fa-sync-alt fa-spin"></i> Автообновление
+        </span>
+        <button type="button" class="btn btn-outline-success btn-sm me-3" onclick="location.reload()">
+            <i class="fa-solid fa-sync-alt"></i> Обновить сейчас
+        </button>
         <a href="{{ url_for('prices') }}" class="btn btn-outline-primary btn-sm me-2"><i class="fa-solid fa-tags"></i> Цены и услуги</a>
+        <a href="{{ url_for('contractors') }}" class="btn btn-outline-info btn-sm me-2"><i class="fa-solid fa-users"></i> Подрядчики</a>
         <a href="{{ url_for('weekends') }}" class="btn btn-outline-warning btn-sm me-2"><i class="fa-solid fa-calendar-days"></i> Выходные</a>
         <a href="{{ url_for('logout') }}" class="btn btn-outline-light btn-sm"><i class="fa-solid fa-right-from-bracket"></i> Выйти</a>
     </div>
@@ -176,19 +225,29 @@
                         <td>{{ order[4] }}</td>
                         <td>{{ order[5] }}</td>
                         <td>{{ order[6] }}</td>
-                        <td>{% if order[7] %}<a href="/uploads/{{ order[7] }}" target="_blank" class="btn btn-outline-primary btn-sm"><i class="fa-solid fa-image"></i> Фото</a>{% endif %}</td>
+                        <td>
+                            {% if order[7] %}
+                                {% set photos = order[7].split(', ') %}
+                                {% if photos|length == 1 %}
+                                    <button type="button" class="btn btn-photo btn-sm" data-bs-toggle="modal" data-bs-target="#imageModal{{ order[0] }}_0">
+                                        <i class="fa-solid fa-image"></i> Фото
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-photo btn-sm" data-bs-toggle="modal" data-bs-target="#imageModal{{ order[0] }}_0">
+                                        <i class="fa-solid fa-images"></i> Фото ({{ photos|length }})
+                                    </button>
+                                {% endif %}
+                            {% endif %}
+                        </td>
                         <td>{{ order[8] }}</td>
                         <td>{{ order[9] }}</td>
                         <td><b>{{ order[11] }}</b> ₽</td>
                         <td>
-                            <form class="status-form" method="post" action="/update_status">
-                                <input type="hidden" name="order_id" value="{{ order[0] }}">
-                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
-                                    <option value="новая" {% if order[11]=='новая' %}selected{% endif %}>новая</option>
-                                    <option value="в работе" {% if order[11]=='в работе' %}selected{% endif %}>в работе</option>
-                                    <option value="выполнена" {% if order[11]=='выполнена' %}selected{% endif %}>выполнена</option>
-                                </select>
-                            </form>
+                            <select class="form-select form-select-sm" onchange="updateOrderStatus('{{ order[0] }}', this.value)">
+                                                <option value="новая" {% if order[12]=='новая' %}selected{% endif %}>новая</option>
+                <option value="в работе" {% if order[12]=='в работе' %}selected{% endif %}>в работе</option>
+                <option value="завершенная" {% if order[12]=='завершенная' %}selected{% endif %}>завершенная</option>
+                            </select>
                         </td>
                         <td>
                             <form method="post" action="/delete_order" onsubmit="return confirm('Удалить заявку?');">
@@ -202,5 +261,147 @@
             </table>
         </div>
     </div>
+
+    <!-- Модальные окна для изображений -->
+    {% for order in orders %}
+        {% if order[7] %}
+            {% set photos = order[7].split(', ') %}
+            {% for photo in photos %}
+                {% set photo_index = loop.index0 %}
+                <div class="modal fade" id="imageModal{{ order[0] }}_{{ photo_index }}" tabindex="-1" aria-labelledby="imageModalLabel{{ order[0] }}_{{ photo_index }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="imageModalLabel{{ order[0] }}_{{ photo_index }}">
+                                    Фото заявки #{{ order[0] }}
+                                    {% if photos|length > 1 %}
+                                        ({{ photo_index + 1 }} из {{ photos|length }})
+                                    {% endif %}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img src="/uploads/{{ photo }}" class="img-fluid" alt="Фото заявки" style="max-height: 70vh;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div style="display: none; color: #666; font-style: italic;">
+                                    <i class="fa-solid fa-exclamation-triangle"></i> Фото не найдено
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <div class="me-auto">
+                                    {% if photos|length > 1 %}
+                                        {% if photo_index > 0 %}
+                                            <button type="button" class="btn btn-outline-secondary" onclick="showImageModal('{{ order[0] }}', {{ photo_index - 1 }})">
+                                                <i class="fa-solid fa-chevron-left"></i> Предыдущее
+                                            </button>
+                                        {% endif %}
+                                        {% if photo_index < photos|length - 1 %}
+                                            <button type="button" class="btn btn-outline-secondary" onclick="showImageModal('{{ order[0] }}', {{ photo_index + 1 }})">
+                                                Следующее <i class="fa-solid fa-chevron-right"></i>
+                                            </button>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                                <a href="/uploads/{{ photo }}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="fa-solid fa-external-link-alt"></i> Открыть в новой вкладке
+                                </a>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endfor %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showImageModal(orderId, photoIndex) {
+            // Закрываем текущее модальное окно
+            var currentModal = document.querySelector('.modal.show');
+            if (currentModal) {
+                var modal = bootstrap.Modal.getInstance(currentModal);
+                modal.hide();
+            }
+            
+            // Открываем новое модальное окно
+            setTimeout(function() {
+                var newModal = new bootstrap.Modal(document.getElementById('imageModal' + orderId + '_' + photoIndex));
+                newModal.show();
+            }, 300);
+        }
+
+        // Автоматическое обновление страницы каждые 30 секунд
+        function autoRefresh() {
+            var countdown = 30;
+            var indicator = document.getElementById('auto-refresh-indicator');
+            
+            var timer = setInterval(function() {
+                countdown--;
+                if (indicator) {
+                    indicator.innerHTML = '<i class="fa-solid fa-sync-alt fa-spin"></i> Обновление через ' + countdown + 'с';
+                }
+                
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    location.reload();
+                }
+            }, 1000);
+        }
+
+        // Запускаем автообновление при загрузке страницы
+        window.onload = function() {
+            autoRefresh();
+        };
+
+        // Принудительное обновление при нажатии F5 или Ctrl+R
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                e.preventDefault();
+                location.reload(true);
+            }
+        });
+
+        // Обновляем статус заявки без перезагрузки страницы
+        function updateOrderStatus(orderId, newStatus) {
+            fetch('/update_status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'order_id=' + orderId + '&status=' + newStatus
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Показываем уведомление об успешном обновлении
+                    showNotification('Статус обновлен!', 'success');
+                } else {
+                    showNotification('Ошибка обновления статуса', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Ошибка обновления статуса', 'danger');
+            });
+        }
+
+        // Показываем уведомления
+        function showNotification(message, type) {
+            var alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-' + type + ' alert-dismissible fade show position-fixed';
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                <i class="fa-solid fa-circle-info me-2"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Автоматически скрываем через 3 секунды
+            setTimeout(function() {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 3000);
+        }
+    </script>
 </body>
 </html> 
