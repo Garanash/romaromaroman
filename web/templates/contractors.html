@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Подрядчики | Админка</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background: #f6f8fa; font-family: 'Montserrat', Arial, sans-serif; color: #222; }
+        .navbar { background: #fff; border-bottom: 1px solid #e5e7eb; box-shadow: 0 2px 12px rgba(30,64,175,0.04); border-radius: 0 0 1.2rem 1.2rem; padding-top: 0.7rem; padding-bottom: 0.7rem; }
+        .navbar .navbar-brand { color: #1e40af; font-weight: 700; font-size: 1.3rem; letter-spacing: 0.01em; }
+        .navbar .btn { background: #fff; border: 1.5px solid #e5e7eb; box-shadow: 0 1px 4px rgba(30,64,175,0.04); margin-left: 0.5rem; color: #1e40af; font-weight: 500; }
+        .navbar .btn:hover { background: #1e40af; color: #fff; border-color: #1e40af; }
+        .main-card { background: #fff; border-radius: 1.2rem; box-shadow: 0 4px 32px rgba(30,64,175,0.07); padding: 2.2rem 2rem 2rem 2rem; margin-bottom: 2rem; }
+        .btn { border-radius: 0.7rem; font-weight: 600; letter-spacing: 0.02em; transition: box-shadow 0.2s; }
+        .btn-outline-primary { border-color: #1e40af; color: #1e40af; }
+        .btn-outline-primary:hover { background: #1e40af; color: #fff; }
+        .btn-outline-danger { border-color: #a21caf; color: #a21caf; }
+        .btn-outline-danger:hover { background: #a21caf; color: #fff; }
+        .btn-outline-light { border-color: #e5e7eb; color: #1e40af; }
+        .btn-outline-light:hover { background: #1e40af; color: #fff; }
+        .btn-outline-info { border-color: #0ea5e9; color: #0ea5e9; }
+        .btn-outline-info:hover { background: #0ea5e9; color: #fff; }
+        .alert { border-radius: 0.7rem; font-weight: 500; background: #e0e7ff; color: #1e40af; border: none; box-shadow: 0 2px 8px rgba(30,64,175,0.07); margin-bottom: 1.2rem; }
+        .table { border-radius: 1rem; overflow: hidden; background: #fff; }
+        .table th, .table td { text-align: center; vertical-align: middle; }
+        .table th { background: #1e40af; color: white; border: none; padding: 15px; font-weight: 600; }
+        .table td { padding: 15px; border: none; border-bottom: 1px solid #e9ecef; }
+        .table tbody tr:hover { background-color: #f8f9fa; }
+        @media (max-width: 900px) { .main-card { padding: 1.2rem 0.5rem; } .table { font-size: 0.97rem; } }
+    </style>
+    <script>
+    window.onload = function() {
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(el => el.style.opacity = 0);
+        }, 2500);
+    }
+    </script>
+</head>
+<body>
+<nav class="navbar navbar-dark mb-4 sticky-top shadow-sm">
+    <div class="container-fluid">
+        <span class="navbar-brand mb-0 h1"><i class="fa-solid fa-users me-2"></i>Админка: Подрядчики</span>
+        <a href="/" class="btn btn-outline-light btn-sm me-2"><i class="fa-solid fa-arrow-left"></i> Назад к заявкам</a>
+        <a href="/prices" class="btn btn-outline-primary btn-sm me-2"><i class="fa-solid fa-tags"></i> Цены</a>
+        <a href="/weekends" class="btn btn-outline-warning btn-sm"><i class="fa-solid fa-calendar-days"></i> Выходные</a>
+    </div>
+</nav>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} mt-3 shadow d-flex align-items-center"><i class="fa-solid fa-circle-info me-2"></i> {{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <div class="main-card">
+        <h5 class="mb-3"><i class="fa-solid fa-users me-2"></i>Управление подрядчиками</h5>
+        <form method="post" action="/add_contractor" class="mb-4">
+            <div class="row">
+                <div class="col-md-4 mb-2">
+                    <label for="contractor_name" class="form-label">Имя подрядчика</label>
+                    <input type="text" class="form-control" id="contractor_name" name="contractor_name" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label for="contractor_phone" class="form-label">Телефон</label>
+                    <input type="tel" class="form-control" id="contractor_phone" name="contractor_phone" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <label for="contractor_telegram" class="form-label">Telegram ID</label>
+                    <input type="text" class="form-control" id="contractor_telegram" name="contractor_telegram" placeholder="123456789">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="fa-solid fa-plus"></i> Добавить подрядчика
+                    </button>
+                </div>
+            </div>
+        </form>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Имя</th>
+                        <th>Телефон</th>
+                        <th>Telegram ID</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contractor in contractors %}
+                    <tr>
+                        <td>{{ contractor[0] }}</td>
+                        <td>{{ contractor[1] }}</td>
+                        <td>{{ contractor[2] }}</td>
+                        <td>{{ contractor[3] if contractor[3] else '-' }}</td>
+                                                       <td>
+                                   <a href="{{ url_for('edit_contractor', contractor_id=contractor[0]) }}" class="btn btn-outline-primary btn-sm me-2">
+                                       <i class="fa-solid fa-edit"></i>
+                                   </a>
+                                   <form method="post" action="/delete_contractor" style="display: inline;">
+                                       <input type="hidden" name="contractor_id" value="{{ contractor[0] }}">
+                                       <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Удалить подрядчика?')">
+                                           <i class="fa-solid fa-trash"></i>
+                                       </button>
+                                   </form>
+                               </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html> 

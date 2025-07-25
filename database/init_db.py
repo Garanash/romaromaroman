@@ -41,6 +41,14 @@ def init_db():
             date TEXT UNIQUE NOT NULL
         )
     ''')
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS contractors (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            telegram_id TEXT
+        )
+    ''')
     conn.commit()
     conn.close()
 

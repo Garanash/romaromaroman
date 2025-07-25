@@ -1,56 +1,19 @@
  * Serving Flask app 'app'
  * Debug mode: on
 [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
- * Running on http://127.0.0.1:5000
+ * Running on http://127.0.0.1:5001
 [33mPress CTRL+C to quit[0m
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 684-557-523
-127.0.0.1 - - [24/Jul/2025 11:25:54] "GET /prices HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:30:48] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:31:31] "GET /prices HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:31:43] "[32mPOST /prices HTTP/1.1[0m" 302 -
-127.0.0.1 - - [24/Jul/2025 11:31:43] "GET /prices HTTP/1.1" 200 -
- * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 684-557-523
-127.0.0.1 - - [24/Jul/2025 11:32:34] "GET /prices HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:32:36] "[32mPOST /prices HTTP/1.1[0m" 302 -
-127.0.0.1 - - [24/Jul/2025 11:32:36] "GET /prices HTTP/1.1" 200 -
- * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 684-557-523
-127.0.0.1 - - [24/Jul/2025 11:32:59] "[32mPOST /prices HTTP/1.1[0m" 302 -
-127.0.0.1 - - [24/Jul/2025 11:32:59] "GET /prices HTTP/1.1" 200 -
- * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 684-557-523
-127.0.0.1 - - [24/Jul/2025 11:33:02] "[32mPOST /prices HTTP/1.1[0m" 302 -
-127.0.0.1 - - [24/Jul/2025 11:33:02] "GET /prices HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:33:03] "[32mPOST /prices HTTP/1.1[0m" 302 -
-127.0.0.1 - - [24/Jul/2025 11:33:03] "GET /prices HTTP/1.1" 200 -
- * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 684-557-523
-127.0.0.1 - - [24/Jul/2025 11:33:03] "[32mPOST /prices HTTP/1.1[0m" 302 -
- * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 684-557-523
-127.0.0.1 - - [24/Jul/2025 11:33:03] "GET /prices HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:33:03] "[32mPOST /prices HTTP/1.1[0m" 302 -
- * Detected change in '/Users/andreydolgov/Desktop/programming/forRoman/bot/materials.py', reloading
- * Restarting with stat
- * Debugger is active!
- * Debugger PIN: 684-557-523
-127.0.0.1 - - [24/Jul/2025 11:33:04] "GET /prices HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:33:37] "GET / HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:33:40] "GET /weekends HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:33:44] "GET /weekends?year=2025&month=8 HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:33:46] "GET /weekends?year=2025&month=9 HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:33:49] "GET /weekends?year=2025&month=8 HTTP/1.1" 200 -
-127.0.0.1 - - [24/Jul/2025 11:34:22] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jul/2025 00:08:55] "[32mGET / HTTP/1.1[0m" 302 -
+127.0.0.1 - - [26/Jul/2025 00:08:55] "GET /login?next=/ HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jul/2025 00:09:02] "[32mPOST /login?next=/ HTTP/1.1[0m" 302 -
+127.0.0.1 - - [26/Jul/2025 00:09:02] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jul/2025 00:09:02] "[36mGET /uploads/8112673874_AgACAgIAAxkBAAIEuWiD4e3qe_Qr2YlUHZkT3kPWGfexAAJ6_jEbbbwgSAXhfqqUMWoHAQADAgADeAADNgQ.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [26/Jul/2025 00:09:02] "[36mGET /uploads/8112673874_AgACAgIAAxkBAAIEt2iD4eSGfa0__CJs5-NkcWYtWM-vAAJ5_jEbbbwgSB_ykBCUOFTBAQADAgADeQADNgQ.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [26/Jul/2025 00:09:02] "[36mGET /uploads/8112673874_AgACAgIAAxkBAAIC12iDKuDmy_Ac5LYJMAThHI_IswvbAAIz-zEbbbwYSGl6y1isItMXAQADAgADeQADNgQ.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [26/Jul/2025 00:09:32] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [26/Jul/2025 00:09:32] "[36mGET /uploads/8112673874_AgACAgIAAxkBAAIEuWiD4e3qe_Qr2YlUHZkT3kPWGfexAAJ6_jEbbbwgSAXhfqqUMWoHAQADAgADeAADNgQ.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [26/Jul/2025 00:09:32] "[36mGET /uploads/8112673874_AgACAgIAAxkBAAIEt2iD4eSGfa0__CJs5-NkcWYtWM-vAAJ5_jEbbbwgSB_ykBCUOFTBAQADAgADeQADNgQ.jpg HTTP/1.1[0m" 304 -
+127.0.0.1 - - [26/Jul/2025 00:09:32] "[36mGET /uploads/8112673874_AgACAgIAAxkBAAIC12iDKuDmy_Ac5LYJMAThHI_IswvbAAIz-zEbbbwYSGl6y1isItMXAQADAgADeQADNgQ.jpg HTTP/1.1[0m" 304 -

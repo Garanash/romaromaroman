@@ -313,11 +313,9 @@ async def show_order_summary(message, state):
     material = data.get('material', '')
     # Цена материала
     price = MATERIALS.get(material, 0) * area
-    # Цена монтажа (всегда включается)
-    price_montage = 450 * area
     # Цена доп. услуг
     extras_price = sum(EXTRAS.get(e, 0) for e in extras)
-    total = price + price_montage + extras_price
+    total = price + extras_price
     summary = f"""
 <b>Проверьте заявку:</b>
 Имя: {data.get('name')}
@@ -325,7 +323,7 @@ async def show_order_summary(message, state):
 Адрес: {data.get('address')}
 Материал: {material}
 Площадь: {area} м²
-Доп. работы: Монтаж потолка (450₽/м²){', ' + ', '.join(extras) if extras else ''}
+Доп. работы: {', '.join(extras) if extras else 'нет'}
 Дата замера: {data.get('date')}
 Время замера: {data.get('time') if data.get('time') else '-'}
 Фото: {'есть' if data.get('photos') else 'нет'}
@@ -360,10 +358,28 @@ async def process_confirm(message: types.Message, state: FSMContext):
             data.get('price'),
             'новая',
         ))
+        order_id = c.lastrowid  # Получаем ID до закрытия соединения
         conn.commit()
         conn.close()
-        # Уведомление мастеру
-        await notify_master(message.bot, data)
+        # Уведомление мастеру через админ-бот
+        from admin_bot.notifications import send_new_order_notification
+        order_data = {
+            'id': order_id,  # ID только что созданной заявки
+            'name': data.get('name'),
+            'phone': data.get('phone'),
+            'address': data.get('address'),
+            'material': data.get('material'),
+            'area': data.get('area'),
+            'extras': data.get('extras', []),
+            'photos': data.get('photos', []),
+            'date': data.get('date'),
+            'time': data.get('time'),
+            'price': data.get('price')
+        }
+        print(f"Создана заявка с ID: {order_id}")
+        print(f"Отправляем уведомление в админ-бот...")
+        await send_new_order_notification(order_data)
+        print("Уведомление отправлено")
         await state.clear()
         await message.answer('Ваша заявка принята! Мы свяжемся с вами в ближайшее время.', reply_markup=ReplyKeyboardRemove())
         return
@@ -371,7 +387,7 @@ async def process_confirm(message: types.Message, state: FSMContext):
 
 # Уведомление мастеру в Telegram
 async def notify_master(bot, data):
-    master_id = 5137827921
+    master_id = 1904520384
     extras = ', '.join(data.get('extras', [])) if data.get('extras') else 'нет'
     photos = data.get('photos', [])
     text = f"""
