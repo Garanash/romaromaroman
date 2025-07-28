@@ -7,6 +7,7 @@ class OrderFSM(StatesGroup):
     material = State()
     area = State()
     extras = State()
+    extra_meters = State()  # новое состояние для ввода метров
     photos = State()
     date = State()
     time = State()  # новое состояние для времени

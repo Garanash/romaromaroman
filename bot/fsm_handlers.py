@@ -139,7 +139,7 @@ async def process_area(message: types.Message, state: FSMContext):
     materials_mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(materials_mod)
     EXTRAS = dict(materials_mod.EXTRAS)
-    buttons = [[KeyboardButton(text=f'{extra} ({EXTRAS[extra]}₽)')] for extra in EXTRAS.keys()]
+    buttons = [[KeyboardButton(text=f'{extra} ({EXTRAS[extra]}₽{" за м/п" if "м/п" in extra else ""})')] for extra in EXTRAS.keys()]
     buttons.append([KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
     await message.answer('Выберите дополнительные работы (можно несколько, затем "Далее"):', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
     await state.set_state(OrderFSM.extras)
@@ -150,11 +150,14 @@ async def process_extras(message: types.Message, state: FSMContext):
     text = message.text.strip()
     data = await state.get_data()
     selected = data.get('extras', [])
+    selected_with_meters = data.get('extras_with_meters', {})  # {услуга: метры}
+    
     # Динамически загружаем доп. услуги
     spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
     materials_mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(materials_mod)
     EXTRAS = dict(materials_mod.EXTRAS)
+    
     if text.lower() == 'отмена':
         await state.clear()
         await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
@@ -165,28 +168,103 @@ async def process_extras(message: types.Message, state: FSMContext):
         await state.set_state(OrderFSM.area)
         return
     if text.lower() == 'далее':
-        await state.update_data(extras=selected)
+        # Объединяем обычные услуги и услуги с метрами
+        all_extras = selected.copy()
+        for extra, meters in selected_with_meters.items():
+            if extra not in all_extras:
+                all_extras.append(f"{extra} ({meters} м/п)")
+        await state.update_data(extras=all_extras, extras_with_meters=selected_with_meters)
         await message.answer('Пожалуйста, отправьте фото помещения (можно несколько, затем "Далее") или просто далее:', reply_markup=ReplyKeyboardMarkup(
             keyboard=[[KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')]], resize_keyboard=True))
         await state.set_state(OrderFSM.photos)
         return
+    
     # Проверяем по кнопке с ценой
     chosen = None
     for extra in EXTRAS.keys():
         if text.startswith(extra):
             chosen = extra
             break
+    
     if chosen:
-        if chosen not in selected:
-            selected.append(chosen)
-        await state.update_data(extras=selected)
-        # Пересобираем кнопки без выбранных опций
-        remaining = [e for e in EXTRAS.keys() if e not in selected]
-        buttons = [[KeyboardButton(text=f'{e} ({EXTRAS[e]}₽)')] for e in remaining]
-        buttons.append([KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
-        await message.answer(f'Добавлено: {chosen}. Можно выбрать ещё или нажать "Далее".', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
-        return
+        # Проверяем, является ли услуга с п/м
+        if 'м/п' in chosen:
+            # Сохраняем выбранную услугу и переходим к вводу метров
+            await state.update_data(pending_extra=chosen)
+            await message.answer(f'Выбрана услуга: {chosen}\n\nВведите количество погонных метров:', reply_markup=ReplyKeyboardMarkup(
+                keyboard=[[KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')]], resize_keyboard=True))
+            await state.set_state(OrderFSM.extra_meters)
+            return
+        else:
+            # Обычная услуга без метров
+            if chosen not in selected:
+                selected.append(chosen)
+            await state.update_data(extras=selected, extras_with_meters=selected_with_meters)
+            
+            # Пересобираем кнопки без выбранных опций
+            remaining = [e for e in EXTRAS.keys() if e not in selected and e not in selected_with_meters]
+            buttons = [[KeyboardButton(text=f'{e} ({EXTRAS[e]}₽{" за м/п" if "м/п" in e else ""})')] for e in remaining]
+            buttons.append([KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
+            await message.answer(f'Добавлено: {chosen}. Можно выбрать ещё или нажать "Далее".', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
+            return
+    
     await message.answer('Пожалуйста, выберите опцию из списка или нажмите "Далее".')
+
+# Обработка ввода метров для услуг с п/м
+@router.message(OrderFSM.extra_meters)
+async def process_extra_meters(message: types.Message, state: FSMContext):
+    text = message.text.strip()
+    data = await state.get_data()
+    pending_extra = data.get('pending_extra')
+    selected = data.get('extras', [])
+    selected_with_meters = data.get('extras_with_meters', {})
+    
+    if text.lower() == 'отмена':
+        await state.clear()
+        await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
+        return
+    if text.lower() == 'назад':
+        # Возвращаемся к выбору услуг
+        spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+        materials_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(materials_mod)
+        EXTRAS = dict(materials_mod.EXTRAS)
+        
+        remaining = [e for e in EXTRAS.keys() if e not in selected and e not in selected_with_meters]
+        buttons = [[KeyboardButton(text=f'{e} ({EXTRAS[e]}₽{" за м/п" if "м/п" in e else ""})')] for e in remaining]
+        buttons.append([KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
+        await message.answer('Выберите дополнительные работы (можно несколько, затем "Далее"):', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
+        await state.set_state(OrderFSM.extras)
+        return
+    
+    # Проверяем, что введено число
+    try:
+        meters = float(text)
+        if meters <= 0:
+            await message.answer('Количество метров должно быть больше 0. Попробуйте ещё раз.')
+            return
+        if meters > 1000:  # Ограничение на разумное количество метров
+            await message.answer('Количество метров слишком большое. Попробуйте ещё раз.')
+            return
+    except ValueError:
+        await message.answer('Пожалуйста, введите число (например: 5.5 или 10):')
+        return
+    
+    # Сохраняем услугу с метрами
+    selected_with_meters[pending_extra] = meters
+    await state.update_data(extras=selected, extras_with_meters=selected_with_meters, pending_extra=None)
+    
+    # Возвращаемся к выбору услуг
+    spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+    materials_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(materials_mod)
+    EXTRAS = dict(materials_mod.EXTRAS)
+    
+    remaining = [e for e in EXTRAS.keys() if e not in selected and e not in selected_with_meters]
+    buttons = [[KeyboardButton(text=f'{e} ({EXTRAS[e]}₽{" за м/п" if "м/п" in e else ""})')] for e in remaining]
+    buttons.append([KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
+    await message.answer(f'Добавлено: {pending_extra} ({meters} м/п). Можно выбрать ещё или нажать "Далее".', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
+    await state.set_state(OrderFSM.extras)
 
 # Загрузка фото
 @router.message(OrderFSM.photos, F.photo)
@@ -212,7 +290,18 @@ async def process_photos_control(message: types.Message, state: FSMContext):
         await message.answer('Заявка отменена.', reply_markup=ReplyKeyboardMarkup(keyboard=[[KeyboardButton(text='Создать новую заявку')]], resize_keyboard=True))
         return
     if text == 'назад':
-        buttons = [[KeyboardButton(text=extra)] for extra in EXTRAS.keys()]
+        # Динамически загружаем доп. услуги
+        spec = importlib.util.spec_from_file_location('materials', 'bot/materials.py')
+        materials_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(materials_mod)
+        EXTRAS = dict(materials_mod.EXTRAS)
+        
+        data = await state.get_data()
+        selected = data.get('extras', [])
+        selected_with_meters = data.get('extras_with_meters', {})
+        
+        remaining = [e for e in EXTRAS.keys() if e not in selected and e not in selected_with_meters]
+        buttons = [[KeyboardButton(text=f'{e} ({EXTRAS[e]}₽{" за м/п" if "м/п" in e else ""})')] for e in remaining]
         buttons.append([KeyboardButton(text='Далее'), KeyboardButton(text='Назад'), KeyboardButton(text='Отмена')])
         await message.answer('Выберите дополнительные работы (можно несколько, затем "Далее"):', reply_markup=ReplyKeyboardMarkup(keyboard=buttons, resize_keyboard=True))
         await state.set_state(OrderFSM.extras)
@@ -309,13 +398,36 @@ async def show_order_summary(message, state):
     MATERIALS = materials_mod.MATERIALS
     EXTRAS = dict(materials_mod.EXTRAS)
     extras = data.get('extras', [])
+    extras_with_meters = data.get('extras_with_meters', {})
     area = data.get('area', 0)
     material = data.get('material', '')
+    
     # Цена материала
-    price = MATERIALS.get(material, 0) * area
-    # Цена доп. услуг
-    extras_price = sum(EXTRAS.get(e, 0) for e in extras)
-    total = price + extras_price
+    material_price = MATERIALS.get(material, 0) * area
+    
+    # Цена доп. услуг (обычные + с метрами)
+    extras_price = 0
+    extras_list = []
+    
+    # Обычные услуги
+    for extra in extras:
+        if 'м/п' not in extra:  # Не услуги с метрами
+            extras_price += EXTRAS.get(extra, 0)
+            extras_list.append(extra)
+    
+    # Услуги с метрами
+    for extra, meters in extras_with_meters.items():
+        extra_price = EXTRAS.get(extra, 0) * meters
+        extras_price += extra_price
+        extras_list.append(f"{extra} ({meters} м/п)")
+    
+    # Монтаж потолка (автоматически добавляется)
+    installation_price = area * 450
+    extras_price += installation_price
+    extras_list.append(f"Монтаж потолка ({area} м²)")
+    
+    total = material_price + extras_price
+    
     summary = f"""
 <b>Проверьте заявку:</b>
 Имя: {data.get('name')}
@@ -323,7 +435,7 @@ async def show_order_summary(message, state):
 Адрес: {data.get('address')}
 Материал: {material}
 Площадь: {area} м²
-Доп. работы: {', '.join(extras) if extras else 'нет'}
+Доп. работы: {', '.join(extras_list) if extras_list else 'нет'}
 Дата замера: {data.get('date')}
 Время замера: {data.get('time') if data.get('time') else '-'}
 Фото: {'есть' if data.get('photos') else 'нет'}

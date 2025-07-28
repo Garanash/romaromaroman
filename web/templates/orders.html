@@ -211,32 +211,32 @@
     <div class="table-responsive" style="width: 100%;">
         <table class="table table-bordered table-hover table-striped align-middle shadow-sm">
                 <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Имя</th>
-                        <th>Телефон</th>
-                        <th>Адрес</th>
-                        <th>Материал</th>
-                        <th>Площадь</th>
-                        <th>Доп. работы</th>
-                        <th>Фото</th>
-                        <th>Дата</th>
-                        <th>Комментарий</th>
-                        <th>Цена</th>
-                        <th>Статус</th>
+                <tr>
+                    <th>ID</th>
+                    <th>Имя</th>
+                    <th>Телефон</th>
+                    <th>Адрес</th>
+                    <th>Материал</th>
+                    <th>Площадь</th>
+                    <th>Доп. работы</th>
+                    <th>Фото</th>
+                    <th>Дата</th>
+                    <th>Комментарий</th>
+                    <th>Цена</th>
+                    <th>Статус</th>
                         <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for order in orders %}
-                    <tr>
-                        <td>{{ order[0] }}</td>
-                        <td>{{ order[1] }}</td>
-                        <td>{{ order[2] }}</td>
-                        <td>{{ order[3] }}</td>
-                        <td>{{ order[4] }}</td>
-                        <td>{{ order[5] }}</td>
-                        <td>{{ order[6] }}</td>
+                </tr>
+            </thead>
+            <tbody>
+            {% for order in orders %}
+                <tr>
+                    <td>{{ order[0] }}</td>
+                    <td>{{ order[1] }}</td>
+                    <td>{{ order[2] }}</td>
+                    <td>{{ order[3] }}</td>
+                    <td>{{ order[4] }}</td>
+                    <td>{{ order[5] }}</td>
+                    <td>{{ order[6] }}</td>
                         <td>
                             {% if order[7] %}
                                 {% set photos = order[7].split(', ') %}
@@ -251,8 +251,8 @@
                                 {% endif %}
                             {% endif %}
                         </td>
-                        <td>{{ order[8] }}</td>
-                        <td>{{ order[9] }}</td>
+                    <td>{{ order[8] }}</td>
+                    <td>{{ order[9] }}</td>
                         <td><b>{{ order[11] }}</b> ₽</td>
                         <td>
                             <select class="form-select form-select-sm" onchange="updateOrderStatus('{{ order[0] }}', this.value)">
@@ -265,14 +265,14 @@
                             <form method="post" action="/delete_order" onsubmit="return confirm('Удалить заявку?');">
                                 <input type="hidden" name="order_id" value="{{ order[0] }}">
                                 <button type="submit" class="btn btn-outline-danger btn-sm"><i class="fa-solid fa-trash"></i></button>
-                            </form>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
+</div>
 
     <!-- Модальные окна для изображений -->
     {% for order in orders %}
